@@ -36,7 +36,24 @@ vector< vector<float> > normalize(vector< vector <float> > grid) {
 	
 	vector< vector<float> > newGrid;
 
-	// todo - your code here
+	//Sum all Probabilities
+  	float sum = 0;
+  	for (int r = 0; r < grid.size(); ++r) {
+      for (int c = 0; c < grid[0].size(); ++c) {
+        	sum += grid[r][c];
+      }
+    }
+           
+    //Normalize each probabilities
+    vector<float> newRow;
+           
+    for (int r = 0; r < grid.size(); ++r) {
+      newRow.clear();
+      for (int c = 0; c < grid[0].size(); ++c) {
+      	newRow.push_back(grid[r][c]/sum);
+      }
+      newGrid.push_back(newRow);
+    }
 
 	return newGrid;
 }
@@ -75,10 +92,50 @@ vector< vector<float> > normalize(vector< vector <float> > grid) {
     	   has been blurred.
 */
 vector < vector <float> > blur(vector < vector < float> > grid, float blurring) {
-
-	vector < vector <float> > newGrid;
 	
-	// your code here
+	int height = grid.size();
+  	int width = grid[0].size();
+  
+	vector < vector <float> > newGrid(height, vector<float>(width,0.0));
+  
+  	//Blurring Grid
+  	float center_prob = 1.0 - blurring;
+  	float corner_prob = blurring / 12.0;
+  	float adjacent_prob = blurring / 6.0;
+
+  	vector< vector<float> > window {{corner_prob, adjacent_prob, corner_prob},
+                                    {adjacent_prob, center_prob, adjacent_prob},
+                                    {corner_prob, adjacent_prob, corner_prob}};
+                                    
+  	for (int i = 0; i < height; ++i) {
+      	for (int j = 0; j < width; ++j) {
+          	float grid_val = grid[i][j];
+          	for (int dx = -1; dx < 2; ++dx) {
+            	for (int dy = -1; dy < 2; ++dy) {
+              		float mult = window[dx + 1][dy + 1];
+              		int new_i, new_j;
+                  
+                  	//New i
+                  	if ((i + dy) < 0) {
+                     	new_i = height - 1; 
+                    }
+                  	else {
+                    	new_i = (i + dy) % height;
+                    }
+                 
+                  	//New j
+                  	if ((j + dx) < 0) {
+                    	new_j = width - 1;
+                    }
+                  	else {
+                    	new_j = (j + dx) % width;
+                    }
+                  
+              		newGrid[new_i][new_j] += mult * grid_val;
+            	}
+          	}
+        }
+    }
 
 	return normalize(newGrid);
 }
